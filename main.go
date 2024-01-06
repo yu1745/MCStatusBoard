@@ -7,8 +7,11 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
+	"os/signal"
 	"strconv"
 	"strings"
+	"syscall"
 )
 
 var (
@@ -21,13 +24,25 @@ var (
 )
 
 func init() {
-	flag.StringVar(&addr, "a", addr, "Listen address")
-	flag.StringVar(&version, "v", version, "Minecraft version")
-	flag.IntVar(&maxPlayers, "m", maxPlayers, "Max players")
-	flag.IntVar(&currentPlayers, "c", currentPlayers, "Current players")
-	flag.StringVar(&description, "d", description, "Description")
-	flag.StringVar(&favicon, "f", favicon, "Favicon path")
+	flag.StringVar(&addr, "a", addr, "监听地址")
+	flag.StringVar(&version, "v", version, "mc版本,全部列表可见于 https://wiki.vg/Protocol_version_numbers")
+	flag.IntVar(&maxPlayers, "m", maxPlayers, "最大玩家数目(不建议修改)")
+	flag.IntVar(&currentPlayers, "c", currentPlayers, "当前在线玩家数目(不建议修改)")
+	flag.StringVar(&description, "d", description, "服务器的motd")
+	flag.StringVar(&favicon, "f", favicon, "base64编码后的图标,格式 data:image/png;base64,<base64字符串>")
 	flag.Parse()
+	exitSignal := make(chan os.Signal, 1)
+	// 使用 signal.Notify 函数来通知指定的信号将发送到给定的 channel
+	signal.Notify(exitSignal, syscall.SIGINT, syscall.SIGTERM)
+	// 启动一个 goroutine 来监听信号
+	go func() {
+		// 等待信号
+		<-exitSignal
+		for _, v := range os.Args {
+			fmt.Printf("%s ", v)
+		}
+		os.Exit(0)
+	}()
 }
 
 type JSONData struct {
@@ -66,6 +81,7 @@ func parse(s string) (net.IP, int) {
 }
 
 func main() {
+
 	ip, port := parse(addr)
 	lsAddr := &net.TCPAddr{
 		IP:   ip,
