@@ -16,17 +16,17 @@ var (
 	version        = "1.12.2"
 	maxPlayers     = 1
 	currentPlayers = 1
-	description    = "Hello world"
+	description    = "@copyright https://github.com/yu1745/MCStatusBoard"
 	favicon        = ""
 )
 
 func init() {
-	flag.StringVar(&addr, "addr", addr, "Listen address")
-	flag.StringVar(&version, "version", version, "Minecraft version")
-	flag.IntVar(&maxPlayers, "max-players", maxPlayers, "Max players")
-	flag.IntVar(&currentPlayers, "current-players", currentPlayers, "Current players")
-	flag.StringVar(&description, "description", description, "Description")
-	flag.StringVar(&favicon, "favicon", favicon, "Favicon path")
+	flag.StringVar(&addr, "a", addr, "Listen address")
+	flag.StringVar(&version, "v", version, "Minecraft version")
+	flag.IntVar(&maxPlayers, "m", maxPlayers, "Max players")
+	flag.IntVar(&currentPlayers, "c", currentPlayers, "Current players")
+	flag.StringVar(&description, "d", description, "Description")
+	flag.StringVar(&favicon, "f", favicon, "Favicon path")
 	flag.Parse()
 }
 
@@ -92,6 +92,9 @@ func main() {
 			Text: description,
 		},
 		Favicon: favicon,
+	}
+	if jsonData.Version.Protocol == 0 {
+		jsonData.Version.Protocol = 340 // 1.12.2
 	}
 	bytes, err := json.Marshal(jsonData)
 	if err != nil {
